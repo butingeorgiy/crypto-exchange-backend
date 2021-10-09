@@ -7,12 +7,15 @@ use Illuminate\Http\JsonResponse;
 
 class ApiBaseException extends Exception
 {
-    protected int $statusCode = 500;
+    protected int $status = 500;
 
-    final public function render(): JsonResponse
+    protected string $defaultMessage = 'Internal Server Error.';
+
+    public function render(): JsonResponse
     {
         return response()->json([
-            'message' => $this->getMessage()
-        ], $this->statusCode, options: JSON_UNESCAPED_UNICODE);
+            'error' => true,
+            'message' => $this->getMessage() ?: $this->defaultMessage
+        ], $this->status, options: JSON_UNESCAPED_UNICODE);
     }
 }
