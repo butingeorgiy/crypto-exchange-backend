@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Authentication\AuthenticateRequest;
 use App\Http\Requests\Authentication\RegisterRequest;
 use App\Jobs\EmailVerificationJob;
+use App\Models\Role;
 use App\Models\User;
 use App\Services\AuthenticationService\Exceptions\FailedToAttachTokenException;
 use App\Services\AuthenticationService\Exceptions\NonEmailVerifiedUserException;
@@ -60,6 +61,8 @@ class AuthenticationController extends Controller
             'password' => User::hashPassword($request->input('password')),
             'ref_code' => User::generateRefCode()
         ]);
+
+        $user->roles()->attach(Role::$REGULAR_ROLE_ID);
 
         EmailVerificationJob::dispatch($user)->delay(now()->addSeconds(5));
 
