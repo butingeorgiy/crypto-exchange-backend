@@ -41,7 +41,7 @@ class AuthenticationClient
             return false;
         }
 
-        if (!$this->isUserHasRoles($authToken->user, $roles) && $roles !== null) {
+        if (!is_null($roles) && !$this->isUserHasRoles($authToken->user, $roles)) {
             return false;
         }
 
@@ -57,9 +57,7 @@ class AuthenticationClient
      */
     protected function isUserHasRoles(User $user, array $roles): bool
     {
-        return $user->roles->contains(array_map(function ($role) {
-            return ['alias', $role];
-        }, $roles));
+        return $user->roles->contains('alias', ...$roles);
     }
 
     /**

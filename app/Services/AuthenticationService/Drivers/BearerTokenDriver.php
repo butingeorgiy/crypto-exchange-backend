@@ -2,6 +2,7 @@
 
 namespace App\Services\AuthenticationService\Drivers;
 
+use JetBrains\PhpStorm\ArrayShape;
 use Throwable;
 
 class BearerTokenDriver implements TokenDriverInterface
@@ -9,7 +10,10 @@ class BearerTokenDriver implements TokenDriverInterface
     /**
      * @inheritDoc
      */
-    public function getTokenInfo(): ?array
+    #[ArrayShape([
+        'token_id' => "int",
+        'token_hash' => "string"
+    ])] public function getTokenInfo(): ?array
     {
         if (!$token = request()->bearerToken()) {
             return null;
@@ -28,7 +32,7 @@ class BearerTokenDriver implements TokenDriverInterface
         }
 
         return [
-            'token_id' => $splicedToken[0],
+            'token_id' => intval($splicedToken[0]),
             'token_hash' => $splicedToken[1]
         ];
     }

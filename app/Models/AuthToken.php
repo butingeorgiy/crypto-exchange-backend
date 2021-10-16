@@ -23,9 +23,9 @@ class AuthToken extends Model
 {
     use HasFactory;
 
-    public bool $timestamps = false;
+    public $timestamps = false;
 
-    protected array $guarded = [];
+    protected $guarded = [];
 
     # Relations
 

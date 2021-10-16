@@ -7,7 +7,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use JetBrains\PhpStorm\ArrayShape;
 
-class AuthenticateRequest extends FormRequest
+class RegisterRequest extends FormRequest
 {
     protected $stopOnFirstFailure = true;
 
@@ -18,13 +18,15 @@ class AuthenticateRequest extends FormRequest
      */
     #[ArrayShape([
         'phone_number' => "string[]",
+        'email' => "string",
         'password' => "string"
     ])]
     public function rules(): array
     {
         return [
-            'phone_number' => ['required', 'regex:/^(\d{1,4})(\d{3})(\d{3})(\d{4})$/'],
-            'password' => 'required|min:8'
+            'phone_number' => ['required', 'regex:/^(\d{1,4})(\d{3})(\d{3})(\d{4})$/', 'unique:users,phone_number'],
+            'email' => 'required|email|max:255|unique:users,email',
+            'password' => 'required|min:8|confirmed'
         ];
     }
 

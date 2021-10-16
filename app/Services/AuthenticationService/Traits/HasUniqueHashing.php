@@ -8,6 +8,13 @@ use JetBrains\PhpStorm\Pure;
 trait HasUniqueHashing
 {
     /**
+     * Random hashing salt.
+     *
+     * @var string
+     */
+    protected static string $hashingSalt = 'SeG4OnLH5u%g';
+
+    /**
      * Return user's personal salt that depends on email and password.
      *
      * @return string
@@ -27,7 +34,14 @@ trait HasUniqueHashing
     #[Pure]
     public function checkPassword(string $password): bool
     {
-        return $this->hashPassword($password) === $this->password;
+//        \Log::info('Passwords: ', [
+//            'payload' => [
+//                'hashed' => self::hashPassword($password),
+//                'in_database' => $this->password
+//            ]
+//        ]);
+
+        return self::hashPassword($password) === $this->password;
     }
 
     /**

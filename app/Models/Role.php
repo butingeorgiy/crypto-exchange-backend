@@ -14,5 +14,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Role extends Model
 {
+    # Role IDs
 
+    static int $REGULAR_ROLE_ID = 1;
+    static int $ADMIN_ROLE_ID = 2;
 }

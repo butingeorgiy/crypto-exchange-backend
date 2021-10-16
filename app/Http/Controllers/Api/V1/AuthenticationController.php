@@ -2,31 +2,41 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\ModelExceptions\User\NotFoundException as UserNotFoundException;
 use App\Exceptions\ModelExceptions\User\WrongPasswordException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Authentication\AuthenticateRequest;
+use App\Http\Requests\Authentication\RegisterRequest;
+use App\Jobs\EmailVerificationJob;
 use App\Models\User;
 use App\Services\AuthenticationService\Exceptions\FailedToAttachTokenException;
+use App\Services\AuthenticationService\Exceptions\NonEmailVerifiedUserException;
 use Illuminate\Http\JsonResponse;
-use App\Exceptions\ModelExceptions\User\NotFoundException as UserNotFoundException;
 
 class AuthenticationController extends Controller
 {
     /**
+     * Authenticate user by phone and password.
+     *
      * @param AuthenticateRequest $request
+     *
      * @return JsonResponse
+     *
      * @throws UserNotFoundException
      * @throws WrongPasswordException
      * @throws FailedToAttachTokenException
+     * @throws NonEmailVerifiedUserException
      */
     public function authenticate(AuthenticateRequest $request): JsonResponse
     {
         /** @var User|null $user */
         $user = User::byPhone($request->input('phone_number'))
-            ->select('id')
+            ->select('id', 'password', 'is_email_verified')
             ->first() ?: throw new UserNotFoundException;
 
-        !$user->checkPassword($request->input('password'))
+        $user->is_email_verified ?: throw new NonEmailVerifiedUserException;
+
+        $user->checkPassword($request->input('password'))
             ?: throw new WrongPasswordException;
 
         # Attach auth token to user.
@@ -34,11 +44,29 @@ class AuthenticationController extends Controller
 
         return response()->json([
             'success' => true,
-            'role' => $user->roles->first()->alias,
+            'role' => optional($user->roles->first())->alias,
             'credentials' => [
                 'token' => $encryptedToken,
                 'available_days' => 7
             ]
+        ], options: JSON_UNESCAPED_UNICODE);
+    }
+
+    public function register(RegisterRequest $request): JsonResponse
+    {
+        $user = User::create([
+            'phone_number' => $request->input('phone_number'),
+            'email' => $request->input('email'),
+            'password' => User::hashPassword($request->input('password')),
+            'ref_code' => User::generateRefCode()
+        ]);
+
+        EmailVerificationJob::dispatch($user)->delay(now()->addSeconds(5));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Вы успешно создали аккаунт на Coin Exchange! ' .
+                'На ваш E-mail адрес отправлено письмо-подтверждение для завершения регистрации.'
         ], options: JSON_UNESCAPED_UNICODE);
     }
 }

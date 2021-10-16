@@ -10,13 +10,6 @@ use JetBrains\PhpStorm\Pure;
 trait HasAuthToken
 {
     /**
-     * Random hashing salt.
-     *
-     * @var string
-     */
-    protected static string $hashingSalt = 'SeG4OnLH5u%g';
-
-    /**
      * Generate and attach authentication token to user.
      * Return string that need use for authentication.
      *

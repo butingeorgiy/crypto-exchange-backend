@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 /**
  * @property int id
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null middle_name
  * @property string phone_number
  * @property string email
+ * @property bool is_email_verified
  * @property string password
  * @property string ref_code
  * @property bool is_verified
@@ -26,8 +28,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * @property Collection<AuthToken> tokens
  * @property Collection<Role> roles
+ * @property Collection<EmailVerificationRequest> emailVerifications
  *
  * @method static Builder byPhone(string $phone) Retrieve users by phone number.
+ * @method static Builder byRef(string $refCode) Retrieve users by ref code.
  *
  * @mixin Builder
  */
@@ -42,10 +46,27 @@ class User extends Model
     protected $guarded = [];
 
     protected $casts = [
+        'is_email_verified' => 'boolean',
         'is_verified' => 'boolean'
     ];
 
     # Relations
+
+    /**
+     * Generate unique referral code for user.
+     *
+     * @return string
+     */
+    public static function generateRefCode(): string
+    {
+        while (true) {
+            $refCode = Str::random(8);
+
+            if (!User::byRef($refCode)->exists()) break;
+        }
+
+        return $refCode;
+    }
 
     /**
      * Return user's tokens relations.
@@ -70,14 +91,40 @@ class User extends Model
     # Scopes
 
     /**
+     * Return user's email verification requests relations.
+     *
+     * @return HasMany
+     */
+    public function emailVerifications(): HasMany
+    {
+        return $this->hasMany(EmailVerificationRequest::class);
+    }
+
+    /**
      * Scope for byPhone() method.
      *
      * @param Builder $query
      * @param string $phone
+     *
      * @return Builder
      */
     public function scopeByPhone(Builder $query, string $phone): Builder
     {
         return $query->where('phone_number', $phone);
+    }
+
+    # Other methods
+
+    /**
+     * Scope for byRef() method.
+     *
+     * @param Builder $query
+     * @param string $refCode
+     *
+     * @return Builder
+     */
+    public function scopeByRef(Builder $query, string $refCode): Builder
+    {
+        return $query->where('ref_code', $refCode);
     }
 }
