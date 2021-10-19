@@ -16,5 +16,8 @@ Route::post('sms-confirmation/send', [SmsConfirmationController::class, 'send'])
 Route::post('email-confirmation/send', [EmailConfirmationController::class, 'send']);
 
 Route::prefix('users')->group(function () {
-    Route::get('current', [UserController::class, 'current'])->middleware('auth');
+    Route::prefix('current')->group(function () {
+        Route::get('', [UserController::class, 'current'])->middleware('auth');
+        Route::post('update', [UserController::class, 'updateCurrent'])->middleware('auth:regular-user');
+    });
 });

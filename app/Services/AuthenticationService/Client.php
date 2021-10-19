@@ -6,6 +6,8 @@ use App\Models\AuthToken;
 use App\Models\User;
 use App\Services\AuthenticationService\Drivers\TokenDriverInterface;
 use App\Services\AuthenticationService\Exceptions\UnableToGeneratePersonalSaltException;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Client
 {
@@ -80,9 +82,11 @@ class Client
     /**
      * Get current authenticated user.
      *
+     * @param array|null $fields
+     *
      * @return User|null
      */
-    public function currentUser(): ?User
+    public function currentUser(array $fields = null): ?User
     {
         if (!$tokenInfo = $this->tokenDriver->getTokenInfo()) {
             return null;
@@ -93,7 +97,14 @@ class Client
             return null;
         }
 
-        return $authToken->user;
+        if (is_null($fields)) {
+            $user = $authToken->user;
+        } else {
+            /** @var User|null $user */
+            $user = $authToken->user()->select($fields)->first();
+        }
+
+        return $user;
     }
 
     /**
