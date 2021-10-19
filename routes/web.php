@@ -8,9 +8,5 @@ Route::get('email-verifications/verify', [EmailVerificationController::class, 'v
     ->name('verify-email');
 
 Route::prefix('admin')->group(function () {
-    try {
-        Route::get('logs', [LogViewerController::class, 'index'])->middleware('auth.basic');
-    } catch (Throwable $e) {
-        Log::debug($e->getMessage());
-    }
+    Route::get('logs', [LogViewerController::class, 'index']);
 });
