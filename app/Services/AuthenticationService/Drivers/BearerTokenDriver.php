@@ -13,7 +13,8 @@ class BearerTokenDriver implements TokenDriverInterface
     #[ArrayShape([
         'token_id' => "int",
         'token_hash' => "string"
-    ])] public function getTokenInfo(): ?array
+    ])]
+    public function getTokenInfo(): ?array
     {
         if (!$token = request()->bearerToken()) {
             return null;
@@ -32,7 +33,7 @@ class BearerTokenDriver implements TokenDriverInterface
         }
 
         return [
-            'token_id' => intval($splicedToken[0]),
+            'token_id' => (int) $splicedToken[0],
             'token_hash' => $splicedToken[1]
         ];
     }

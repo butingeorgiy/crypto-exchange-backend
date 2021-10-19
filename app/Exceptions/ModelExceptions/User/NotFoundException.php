@@ -2,11 +2,11 @@
 
 namespace App\Exceptions\ModelExceptions\User;
 
-use App\Exceptions\ApiBaseException;
+use Exception;
 
-class NotFoundException extends ApiBaseException
+class NotFoundException extends Exception
 {
-    protected int $status = 404;
+    public int $status = 404;
 
-    protected string $defaultMessage = 'Пользователь не найден.';
+    public string $defaultMessage = 'Пользователь не найден.';
 }

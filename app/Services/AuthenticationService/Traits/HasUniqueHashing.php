@@ -2,6 +2,7 @@
 
 namespace App\Services\AuthenticationService\Traits;
 
+use App\Services\AuthenticationService\Exceptions\UnableToGeneratePersonalSaltException;
 use Illuminate\Support\Str;
 use JetBrains\PhpStorm\Pure;
 
@@ -18,10 +19,15 @@ trait HasUniqueHashing
      * Return user's personal salt that depends on email and password.
      *
      * @return string
+     *
+     * @throws UnableToGeneratePersonalSaltException
      */
-    #[Pure]
     public function getPersonalSalt(): string
     {
+        if (is_null($this->password) || is_null($this->email)) {
+            throw new UnableToGeneratePersonalSaltException;
+        }
+
         return md5(Str::limit($this->password, 32) . $this->email . self::$hashingSalt);
     }
 
@@ -29,18 +35,12 @@ trait HasUniqueHashing
      * Check user's password.
      *
      * @param string $password
+     *
      * @return bool
      */
     #[Pure]
     public function checkPassword(string $password): bool
     {
-//        \Log::info('Passwords: ', [
-//            'payload' => [
-//                'hashed' => self::hashPassword($password),
-//                'in_database' => $this->password
-//            ]
-//        ]);
-
         return self::hashPassword($password) === $this->password;
     }
 
@@ -48,6 +48,7 @@ trait HasUniqueHashing
      * Hash user's password by unique salt.
      *
      * @param string $password
+     *
      * @return string
      */
     #[Pure]

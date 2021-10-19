@@ -2,20 +2,29 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Auth\Middleware\Authenticate as Middleware;
+use App\Services\AuthenticationService\Client as AuthenticationClient;
+use Closure;
+use Illuminate\Http\Request;
 
-class Authenticate extends Middleware
+class Authenticate
 {
     /**
-     * Get the path the user should be redirected to when they are not authenticated.
+     * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return string|null
+     * @param Request $request
+     * @param Closure $next
+     * @param string ...$roles
+     *
+     * @return mixed|void
      */
-    protected function redirectTo($request)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
-        if (! $request->expectsJson()) {
-            return route('login');
+        $authService = app(AuthenticationClient::class);
+
+        if ($authService->authenticated(count($roles) > 0 ? $roles : null)) {
+            return $next($request);
+        } else {
+            abort(401, 'Пользователь не авторизован.');
         }
     }
 }

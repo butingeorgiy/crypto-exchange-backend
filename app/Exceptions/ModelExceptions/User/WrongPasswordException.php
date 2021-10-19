@@ -2,11 +2,11 @@
 
 namespace App\Exceptions\ModelExceptions\User;
 
-use App\Exceptions\ApiBaseException;
+use Exception;
 
-class WrongPasswordException extends ApiBaseException
+class WrongPasswordException extends Exception
 {
-    protected int $status = 403;
+    public int $status = 401;
 
-    protected string $defaultMessage = 'Неверный пароль.';
+    public string $defaultMessage = 'Неверный пароль.';
 }

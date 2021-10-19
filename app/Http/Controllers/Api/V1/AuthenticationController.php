@@ -12,6 +12,9 @@ use App\Models\Role;
 use App\Models\User;
 use App\Services\AuthenticationService\Exceptions\FailedToAttachTokenException;
 use App\Services\AuthenticationService\Exceptions\NonEmailVerifiedUserException;
+use App\Services\AuthenticationService\Exceptions\UnableToGeneratePersonalSaltException;
+use App\Services\SmsConfirmationService\Client as SmsConfirmationClient;
+use App\Services\SmsConfirmationService\Exceptions\WrongSmsCodeException;
 use Illuminate\Http\JsonResponse;
 
 class AuthenticationController extends Controller
@@ -27,12 +30,13 @@ class AuthenticationController extends Controller
      * @throws WrongPasswordException
      * @throws FailedToAttachTokenException
      * @throws NonEmailVerifiedUserException
+     * @throws UnableToGeneratePersonalSaltException
      */
     public function authenticate(AuthenticateRequest $request): JsonResponse
     {
         /** @var User|null $user */
         $user = User::byPhone($request->input('phone_number'))
-            ->select('id', 'password', 'is_email_verified')
+            ->select('id', 'password', 'is_email_verified', 'email')
             ->first() ?: throw new UserNotFoundException;
 
         $user->is_email_verified ?: throw new NonEmailVerifiedUserException;
@@ -53,8 +57,25 @@ class AuthenticationController extends Controller
         ], options: JSON_UNESCAPED_UNICODE);
     }
 
+    /**
+     * Register new regular user account.
+     *
+     * @param RegisterRequest $request
+     *
+     * @return JsonResponse
+     *
+     * @throws WrongSmsCodeException
+     */
     public function register(RegisterRequest $request): JsonResponse
     {
+        $smsService = app(SmsConfirmationClient::class);
+
+        if (!$smsService->verified($request->input('phone_number'), $request->input('secure_code'))) {
+            throw new WrongSmsCodeException;
+        }
+
+        $smsService->deleteLastFromDatabase();
+
         $user = User::create([
             'phone_number' => $request->input('phone_number'),
             'email' => $request->input('email'),

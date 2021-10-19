@@ -21,6 +21,7 @@ class CreateEmailVerificationRequestsTable extends Migration
             # Foreign keys
 
             $table->foreign('user_id')
+                ->cascadeOnDelete()
                 ->references('id')
                 ->on('users');
         });

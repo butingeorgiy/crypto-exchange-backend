@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Role;
 use App\Models\User;
-use App\Services\AuthenticationService\AuthenticationClient;
+use App\Services\AuthenticationService\Client as AuthenticationClient;
 use App\Services\AuthenticationService\Drivers\UnitTestTokenDriver;
 use App\Services\AuthenticationService\Exceptions\FailedToAttachTokenException;
 use Tests\TestCase;

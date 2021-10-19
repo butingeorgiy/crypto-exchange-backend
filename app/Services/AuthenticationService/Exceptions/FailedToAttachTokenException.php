@@ -2,9 +2,11 @@
 
 namespace App\Services\AuthenticationService\Exceptions;
 
-use App\Exceptions\ApiBaseException;
+use Exception;
 
-class FailedToAttachTokenException extends ApiBaseException
+class FailedToAttachTokenException extends Exception
 {
-    protected string $defaultMessage = 'Failed to attach authentication token.';
+    public int $status = 500;
+
+    public string $defaultMessage = 'Failed to attach authentication token.';
 }

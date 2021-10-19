@@ -2,11 +2,11 @@
 
 namespace App\Services\AuthenticationService\Exceptions;
 
-use App\Exceptions\ApiBaseException;
+use Exception;
 
-class NonEmailVerifiedUserException extends ApiBaseException
+class NonEmailVerifiedUserException extends Exception
 {
-    protected int $status = 422;
+    public int $status = 401;
 
-    protected string $defaultMessage = 'Пользователь не подтвердил E-mail.';
+    public string $defaultMessage = 'Пользователь не подтвердил E-mail.';
 }

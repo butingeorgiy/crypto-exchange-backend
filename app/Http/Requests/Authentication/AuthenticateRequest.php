@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests\Authentication;
 
-use App\Exceptions\ApiValidationException;
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use JetBrains\PhpStorm\ArrayShape;
 
@@ -26,16 +24,5 @@ class AuthenticateRequest extends FormRequest
             'phone_number' => ['required', 'regex:/^(\d{1,4})(\d{3})(\d{3})(\d{4})$/'],
             'password' => 'required|min:8'
         ];
-    }
-
-    /**
-     * @param Validator $validator
-     * @return ApiValidationException
-     *
-     * @inheritDoc
-     */
-    protected function failedValidation(Validator $validator): ApiValidationException
-    {
-        throw new  ApiValidationException($validator);
     }
 }

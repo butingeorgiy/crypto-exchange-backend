@@ -125,7 +125,8 @@ return [
         'first_name' => 'Имя',
         'last_name' => 'Фамилия',
         'city_id' => 'Город',
-        'phone_number' => 'Номер телефона'
+        'phone_number' => 'Номер телефона',
+        'secure_code' => 'Код подтверждения'
     ],
 
 ];

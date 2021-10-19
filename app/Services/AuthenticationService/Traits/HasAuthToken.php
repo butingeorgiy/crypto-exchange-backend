@@ -4,8 +4,8 @@ namespace App\Services\AuthenticationService\Traits;
 
 use App\Models\AuthToken;
 use App\Services\AuthenticationService\Exceptions\FailedToAttachTokenException;
+use App\Services\AuthenticationService\Exceptions\UnableToGeneratePersonalSaltException;
 use Illuminate\Support\Str;
-use JetBrains\PhpStorm\Pure;
 
 trait HasAuthToken
 {
@@ -14,9 +14,11 @@ trait HasAuthToken
      * Return string that need use for authentication.
      *
      * @param int $expiration Amount of days when the token is valid
+     *
      * @return string Encrypted token hash
      *
      * @throws FailedToAttachTokenException
+     * @throws UnableToGeneratePersonalSaltException
      */
     public function attachToken(int $expiration = 7): string
     {
@@ -35,9 +37,11 @@ trait HasAuthToken
      * Return hashed token.
      *
      * @param string $token
+     *
      * @return string
+     *
+     * @throws UnableToGeneratePersonalSaltException
      */
-    #[Pure]
     protected function hashToken(string $token): string
     {
         return hash('sha256', $token . $this->getPersonalSalt());
@@ -48,9 +52,11 @@ trait HasAuthToken
      *
      * @param AuthToken $authToken
      * @param string $tokenHash
+     *
      * @return bool
+     *
+     * @throws UnableToGeneratePersonalSaltException
      */
-    #[Pure]
     public function isHashValid(AuthToken $authToken, string $tokenHash): bool
     {
         return $this->hashToken($authToken->token) === $tokenHash;

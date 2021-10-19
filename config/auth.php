@@ -108,4 +108,8 @@ return [
 
     'password_timeout' => 10800,
 
+    'basic_credentials' => [
+        'user' => 'butingeorgiy48',
+        'password' => '*BRfCU5or$!5Ws&HV&L*'
+    ]
 ];
