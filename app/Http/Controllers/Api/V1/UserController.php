@@ -50,15 +50,10 @@ class UserController extends Controller
      * @return JsonResponse
      *
      * @throws FailedToUpdateUserException
-     * @throws WrongEmailCodeException
-     * @throws WrongSmsCodeException
      */
     public function updateCurrent(UpdateCurrentRequest $request): JsonResponse
     {
         $user = app(AuthenticationClient::class)->currentUser();
-
-        $smsService = app(SmsClient::class);
-        $emailService = app(EmailClient::class);
 
         if (
             $request->has('first_name') &&
@@ -81,46 +76,11 @@ class UserController extends Controller
             $user->middle_name = $request->input('middle_name');
         }
 
-        if ($request->has('phone_number') && $user->phone_number !== $request->input('phone_number')) {
-            # Old phone number confirmation.
-            $smsService->verified(
-                $user->phone_number,
-                $request->input('old_phone_number_confirmation_code')
-            ) ?: throw new WrongSmsCodeException('Неверный SMS код для старого номера.');
-
-            # New phone number confirmation.
-            $smsService->verified(
-                $request->input('phone_number'),
-                $request->input('new_phone_number_confirmation_code')
-            ) ?: throw new WrongSmsCodeException('Неверный SMS код для нового номера.');
-
-            SmsConfirmation::whereIn('code', [
-                $request->input('old_phone_number_confirmation_code'),
-                $request->input('new_phone_number_confirmation_code')
-            ])->delete();
-
+        if (
+            $request->has('phone_number') &&
+            $user->phone_number !== $request->input('phone_number')
+        ) {
             $user->phone_number = $request->input('phone_number');
-        }
-
-        if ($request->has('email') && $user->email !== $request->input('email')) {
-            # Old email confirmation.
-            $emailService->verified(
-                $user->email,
-                $request->input('old_email_confirmation_code')
-            ) ?: throw new WrongEmailCodeException('Неверный код для старого E-mail.');
-
-            # New email confirmation.
-            $emailService->verified(
-                $request->input('email'),
-                $request->input('new_email_confirmation_code')
-            ) ?: throw new WrongEmailCodeException('Неверный код для нового E-mail.');
-
-            EmailConfirmation::whereIn('code', [
-                $request->input('old_email_confirmation_code'),
-                $request->input('new_email_confirmation_code')
-            ])->delete();
-
-            $user->email = $request->input('email');
         }
 
         $user->save() ?: throw new FailedToUpdateUserException;

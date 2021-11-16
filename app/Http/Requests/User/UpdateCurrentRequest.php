@@ -20,12 +20,8 @@ class UpdateCurrentRequest extends FormRequest
         'first_name' => "string",
         'last_name' => "string",
         'middle_name' => "string",
-        'phone_number' => "array",
-        'email' => "array",
-        'old_phone_number_confirmation_code' => "string",
-        'new_phone_number_confirmation_code' => "string",
-        'old_email_confirmation_code' => "string",
-        'new_email_confirmation_code' => "string"])]
+        'phone_number' => "array"
+    ])]
     public function rules(): array
     {
         return [
@@ -45,26 +41,7 @@ class UpdateCurrentRequest extends FormRequest
 
                     if ($isExist) $fail(trans('validation.unique', ['attribute' => $attribute]));
                 }
-            ],
-            'email' => [
-                'nullable',
-                'email',
-                'max:255',
-                function ($attribute, $value, $fail) {
-                    $userId = app(AuthenticationClient::class)->currentUserId();
-
-                    $isExist = User::where([
-                        ['id', '!=', $userId],
-                        ['email', $value]
-                    ])->exists();
-
-                    if ($isExist) $fail(trans('validation.unique', ['attribute' => $attribute]));
-                }
-            ],
-            'old_phone_number_confirmation_code' => 'required_with:phone_number|string|size:6',
-            'new_phone_number_confirmation_code' => 'required_with:phone_number|string|size:6',
-            'old_email_confirmation_code' => 'required_with:email|string|size:6',
-            'new_email_confirmation_code' => 'required_with:email|string|size:6'
+            ]
         ];
     }
 }
