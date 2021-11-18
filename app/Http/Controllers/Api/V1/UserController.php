@@ -4,16 +4,14 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\ModelExceptions\User\FailedToUpdateException as FailedToUpdateUserException;
 use App\Exceptions\ModelExceptions\User\NotFoundException as UserNotFoundException;
+use App\Exceptions\ModelExceptions\UserCredentialsUpdateRequest\FailedToCreateException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\UpdateCredentialsRequest;
 use App\Http\Requests\User\UpdateCurrentRequest;
-use App\Models\EmailConfirmation;
-use App\Models\SmsConfirmation;
 use App\Models\User;
 use App\Services\AuthenticationService\Client as AuthenticationClient;
-use App\Services\EmailConfirmationService\Exceptions\WrongEmailCodeException;
-use App\Services\SmsConfirmationService\Client as SmsClient;
-use App\Services\EmailConfirmationService\Client as EmailClient;
-use App\Services\SmsConfirmationService\Exceptions\WrongSmsCodeException;
+use App\Services\UserService\Client as UserService;
+use App\Services\UserService\Exceptions\CredentialsRequestValidationFailedException;
 use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
@@ -89,5 +87,34 @@ class UserController extends Controller
             'success' => true,
             'message' => 'Изменения успешно сохранены.'
         ], options: JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * Update user's credentials.
+     *
+     * @param UpdateCredentialsRequest $request
+     *
+     * @return JsonResponse
+     *
+     * @throws UserNotFoundException
+     * @throws FailedToCreateException
+     * @throws CredentialsRequestValidationFailedException
+     */
+    public function updateCredentials(UpdateCredentialsRequest $request): JsonResponse
+    {
+        $updater = UserService::credentialsUpdater();
+        $user = app(AuthenticationClient::class)->currentUser(['email']);
+
+        $hiddenEmail = hidden_string($user->email);
+
+        $updater
+            ->parseRequest($request)
+            ->createRequest($request->input('current_password'));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Запрос на изменение данных успешно отправлен. Вам выслано ' .
+                "письмо на $hiddenEmail, чтобы изменения вступили в силу."
+        ]);
     }
 }

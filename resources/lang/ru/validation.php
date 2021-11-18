@@ -129,8 +129,10 @@ return [
         'secure_code' => 'Код подтверждения',
         'old_phone_number_confirmation_code' => 'Код подтверждения старого номера телефона',
         'new_phone_number_confirmation_code' => 'Код подтверждения нового номера телефона',
-        'old_email_confirmation_code' => 'Код подтверждения старого E-mail адреса',
-        'new_email_confirmation_code' => 'Код подтверждения нового E-mail адреса'
+        'current_email_code' => 'Код подтверждения текущего E-mail адреса',
+        'new_email_code' => 'Код подтверждения нового E-mail адреса',
+        'current_password' => 'Текущий пароль',
+        'new_password' => 'Новый пароль'
     ],
 
 ];

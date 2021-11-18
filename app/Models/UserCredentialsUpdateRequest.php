@@ -11,12 +11,14 @@ use Illuminate\Support\Str;
  * @property string id
  * @property string salt
  * @property int user_id
+ * @property string|null email
+ * @property string|null hashed_password
  *
  * @property User user
  *
  * @mixin Builder
  */
-class EmailVerificationRequest extends Model
+class UserCredentialsUpdateRequest extends Model
 {
     public $timestamps = false;
 
@@ -24,10 +26,12 @@ class EmailVerificationRequest extends Model
 
     protected $keyType = 'string';
 
+    public $incrementing = false;
+
     # Relations
 
     /**
-     * Return email verification request's user relation.
+     * Return request's user relation.
      *
      * @return BelongsTo
      */
@@ -36,22 +40,22 @@ class EmailVerificationRequest extends Model
         return $this->belongsTo(User::class);
     }
 
-    # Other method
+    # Other methods
 
     /**
      * Prepare unique model instance.
      *
-     * @return EmailVerificationRequest
+     * @return UserCredentialsUpdateRequest
      */
-    public static function prepareUnique(): EmailVerificationRequest
+    public static function prepareUnique(): UserCredentialsUpdateRequest
     {
         while (true) {
             $uuid = Str::uuid();
 
-            if (!EmailVerificationRequest::where('id', $uuid)->exists()) break;
+            if (!UserCredentialsUpdateRequest::where('id', $uuid)->exists()) break;
         }
 
-        return new EmailVerificationRequest([
+        return new UserCredentialsUpdateRequest([
             'id' => $uuid,
             'salt' => Str::random()
         ]);

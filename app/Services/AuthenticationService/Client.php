@@ -6,8 +6,6 @@ use App\Models\AuthToken;
 use App\Models\User;
 use App\Services\AuthenticationService\Drivers\TokenDriverInterface;
 use App\Services\AuthenticationService\Exceptions\UnableToGeneratePersonalSaltException;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Client
 {

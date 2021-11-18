@@ -17,7 +17,13 @@ Route::post('email-confirmation/send', [EmailConfirmationController::class, 'sen
 
 Route::prefix('users')->group(function () {
     Route::prefix('current')->group(function () {
-        Route::get('', [UserController::class, 'current'])->middleware('auth');
-        Route::post('update', [UserController::class, 'updateCurrent'])->middleware('auth:regular-user');
+        Route::get('', [UserController::class, 'current'])
+            ->middleware('auth');
+
+        Route::post('update', [UserController::class, 'updateCurrent'])
+            ->middleware('auth:regular-user');
+
+        Route::post('update-credentials', [UserController::class, 'updateCredentials'])
+            ->middleware('auth:regular-user');
     });
 });
