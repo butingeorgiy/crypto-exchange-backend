@@ -17,16 +17,14 @@ class RegisterRequest extends FormRequest
     #[ArrayShape([
         'phone_number' => "string[]",
         'email' => "string",
-        'password' => "string",
-        'secure_code' => "string"
+        'password' => "string"
     ])]
     public function rules(): array
     {
         return [
             'phone_number' => ['required', 'regex:/^(\d{1,4})(\d{3})(\d{3})(\d{4})$/', 'unique:users,phone_number'],
             'email' => 'required|email|max:255|unique:users,email',
-            'password' => 'required|min:8|confirmed',
-            'secure_code' => 'required|string|size:6'
+            'password' => 'required|min:8|confirmed'
         ];
     }
 }

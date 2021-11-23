@@ -63,19 +63,9 @@ class AuthenticationController extends Controller
      * @param RegisterRequest $request
      *
      * @return JsonResponse
-     *
-     * @throws WrongSmsCodeException
      */
     public function register(RegisterRequest $request): JsonResponse
     {
-        $smsService = app(SmsConfirmationClient::class);
-
-        if (!$smsService->verified($request->input('phone_number'), $request->input('secure_code'))) {
-            throw new WrongSmsCodeException;
-        }
-
-        $smsService->deleteLastFromDatabase();
-
         $user = User::create([
             'phone_number' => $request->input('phone_number'),
             'email' => $request->input('email'),
