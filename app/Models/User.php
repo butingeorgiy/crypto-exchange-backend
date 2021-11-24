@@ -88,6 +88,16 @@ class User extends Model
         return $this->belongsToMany(Role::class, 'user_has_role');
     }
 
+    /**
+     * Return user's verification requests relations.
+     *
+     * @return HasMany
+     */
+    public function verificationRequests(): HasMany
+    {
+        return $this->hasMany(VerificationRequest::class);
+    }
+
     # Scopes
 
     /**
@@ -113,8 +123,6 @@ class User extends Model
         return $query->where('phone_number', $phone);
     }
 
-    # Other methods
-
     /**
      * Scope for byRef() method.
      *
@@ -126,5 +134,17 @@ class User extends Model
     public function scopeByRef(Builder $query, string $refCode): Builder
     {
         return $query->where('ref_code', $refCode);
+    }
+
+    # Other methods
+
+    /**
+     * Is user verified.
+     *
+     * @return bool
+     */
+    public function isVerified(): bool
+    {
+        return $this->is_verified;
     }
 }

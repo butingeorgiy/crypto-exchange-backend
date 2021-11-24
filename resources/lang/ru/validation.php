@@ -132,7 +132,10 @@ return [
         'current_email_code' => 'Код подтверждения текущего E-mail адреса',
         'new_email_code' => 'Код подтверждения нового E-mail адреса',
         'current_password' => 'Текущий пароль',
-        'new_password' => 'Новый пароль'
+        'new_password' => 'Новый пароль',
+        'telegram_login' => 'Telegram Логин',
+        'selfie_attachment' => 'Селфи с паспортом или удостоверением личности',
+        'scan_attachment' => 'Скан / Фото паспорта или удостоверения личности'
     ],
 
 ];

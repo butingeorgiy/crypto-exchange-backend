@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\AuthenticationController;
 use App\Http\Controllers\Api\V1\EmailConfirmationController;
 use App\Http\Controllers\Api\V1\SmsConfirmationController;
 use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\VerificationController;
 
 Route::get('ping', ['App\Http\Controllers\Api\V1\PingController', 'checkPing']);
 
@@ -26,4 +27,9 @@ Route::prefix('users')->group(function () {
         Route::post('update-credentials', [UserController::class, 'updateCredentials'])
             ->middleware('auth:regular-user');
     });
+});
+
+Route::prefix('verification')->group(function () {
+    Route::post('create-request', [VerificationController::class, 'create'])
+        ->middleware('auth:regular-user');
 });
