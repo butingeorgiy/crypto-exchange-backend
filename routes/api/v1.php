@@ -2,18 +2,18 @@
 
 use App\Http\Controllers\Api\V1\AuthenticationController;
 use App\Http\Controllers\Api\V1\EmailConfirmationController;
-use App\Http\Controllers\Api\V1\SmsConfirmationController;
+use App\Http\Controllers\Api\V1\ExchangeController;
+use App\Http\Controllers\Api\V1\PingController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\VerificationController;
 
-Route::get('ping', ['App\Http\Controllers\Api\V1\PingController', 'checkPing']);
+Route::get('ping', [PingController::class, 'checkPing']);
 
 Route::prefix('authentication')->group(function () {
     Route::post('authenticate', [AuthenticationController::class, 'authenticate']);
     Route::post('register', [AuthenticationController::class, 'register']);
 });
 
-Route::post('sms-confirmation/send', [SmsConfirmationController::class, 'send']);
 Route::post('email-confirmation/send', [EmailConfirmationController::class, 'send']);
 
 Route::prefix('users')->group(function () {
@@ -33,3 +33,5 @@ Route::prefix('verification')->group(function () {
     Route::post('create-request', [VerificationController::class, 'create'])
         ->middleware('auth:regular-user');
 });
+
+Route::get('exchange-directions', [ExchangeController::class, 'directions']);
