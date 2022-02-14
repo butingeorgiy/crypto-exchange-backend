@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\GeneralController;
 use App\Http\Controllers\Api\V1\TransactionController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\VerificationController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('general', [GeneralController::class, 'getServiceData']);
 

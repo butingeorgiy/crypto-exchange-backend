@@ -101,7 +101,7 @@ class Preparator
     protected function getGivenEntityModel(): ExchangeEntity
     {
         return ExchangeEntity::select([
-            'id', 'name', 'type'
+            'id', 'name', 'type', 'cost'
         ])->findOrFail($this->givenEntityId);
     }
 
@@ -113,7 +113,7 @@ class Preparator
     protected function getReceivedEntityModel(): ExchangeEntity
     {
         return ExchangeEntity::select([
-            'id', 'name', 'type'
+            'id', 'name', 'type', 'cost'
         ])->findOrFail($this->receivedEntityId);
     }
 
@@ -145,10 +145,12 @@ class Preparator
             'id' => $this->getTransactionUuid(),
             'given_entity_name' => $givenEntity->name,
             'given_entity_amount' => $this->givenEntityAmount,
+            'given_entity_cost' => $givenEntity->cost,
             'received_entity_name' => $receivedEntity->name,
             'received_entity_amount' => $this->receivedEntityAmount,
-            'meta_direction_id' => ExchangeDirection::getIdByEntities($this->givenEntityId, $this->receivedEntityId),
-            'meta_inverted' => $this->inverted,
+            'received_entity_cost' => $receivedEntity->cost,
+            'direction_id' => ExchangeDirection::getIdByEntities($this->givenEntityId, $this->receivedEntityId),
+            'inverted' => $this->inverted,
             'type' => $this->getTransactionType($givenEntity->type, $receivedEntity->type),
             'status_id' => TransactionStatus::$PREPARED_STATUS_ID
         ]);

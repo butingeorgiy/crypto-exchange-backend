@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\Http\Middleware\BasicAuthentication;
+use App\Http\Middleware\ForceJsonMiddleware;
 use App\Http\Middleware\TrustHosts;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use Illuminate\Routing\Middleware\SubstituteBindings;
@@ -43,6 +44,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+            ForceJsonMiddleware::class,
             'throttle:api',
             TrustHosts::class,
             SubstituteBindings::class,

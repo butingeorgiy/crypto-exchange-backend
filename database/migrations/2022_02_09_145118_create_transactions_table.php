@@ -31,9 +31,16 @@ class CreateTransactionsTable extends Migration
 
             # Transaction Info.
 
+            # Do not add foreign key for `given_entity_id`.
+            # You should not rely on this field.
+            $table->bigInteger('given_entity_id', unsigned: true);
             $table->text('given_entity_name');
             $table->double('given_entity_amount', 12, 5, true);
             $table->double('given_entity_cost', 14, 4, true);
+
+            # Do not add foreign key for `received_entity_id`.
+            # You should not rely on this field.
+            $table->bigInteger('received_entity_id', unsigned: true);
             $table->text('received_entity_name');
             $table->double('received_entity_amount', 12, 5, true);
             $table->double('received_entity_cost', 14, 4, true);

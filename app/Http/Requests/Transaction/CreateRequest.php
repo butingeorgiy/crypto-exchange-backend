@@ -32,7 +32,8 @@ class CreateRequest extends FormRequest
         'user_data' => "string",
         'user_data.name' => "string",
         'user_data.email' => "string",
-        'user_data.phone_number' => "string[]"
+        'user_data.phone_number' => "string[]",
+        'options' => "string"
     ])]
     public function rules(): array
     {
@@ -47,7 +48,8 @@ class CreateRequest extends FormRequest
                 'required_with:user_data',
                 'regex:/^(\d{1,4})(\d{3})(\d{3})(\d{4})$/',
                 'unique:users,phone_number'
-            ]
+            ],
+            'options' => 'nullable|array'
         ];
     }
 
@@ -78,7 +80,7 @@ class CreateRequest extends FormRequest
                 ->findOrFail($this->input('uuid'));
 
             /** @var ExchangeDirection $direction */
-            $direction = $transaction->getMetaDirection(['id']);
+            $direction = $transaction->getDirection(['id']);
 
             if (is_null($direction)) {
                 throw new HttpException(
@@ -104,7 +106,7 @@ class CreateRequest extends FormRequest
                 $canPrepare = TransferServiceClient::validator()
                     ->canUserPrepareTransaction(
                         directionId: $direction->id,
-                        inverted: $transaction->getMetaInverted(),
+                        inverted: $transaction->getIsInverted(),
                         givenEntityAmount: $givenEntityAmount,
                         receivedEntityAmount: $receivedEntityAmount,
                         userId: Auth::id()

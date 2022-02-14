@@ -142,4 +142,9 @@ class ComplexValidator
 
         return true;
     }
+
+    public function checkExtraOptions(string $type, array $options = []): void
+    {
+        // TODO: write method
+    }
 }

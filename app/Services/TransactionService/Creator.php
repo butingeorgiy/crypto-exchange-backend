@@ -63,14 +63,35 @@ class Creator
         }
 
         if ($given) {
+            /** @var ExchangeEntity $receiveEntity */
             $receiveEntity = ExchangeEntity::query()
                 ->select(['id', 'cost'])
-                ->find($request->input('received_entity_id'));
+                ->find($this->transaction->received_entity_id);
 
-            $receiveEntityAmount = $receiveEntity->calculateEquivalentOfAnotherEntity(
-                $request->input('given_entity_id'),
-                $request->input('given_entity_amount')
+            $received = $receiveEntity->calculateEquivalentOfAnotherEntity(
+                $this->transaction->given_entity_id,
+                $given
+            );
+        } else {
+            /** @var ExchangeEntity $givenEntity */
+            $givenEntity = ExchangeEntity::query()
+                ->select(['id', 'cost'])
+                ->find($this->transaction->given_entity_id);
+
+            $given = $givenEntity->calculateEquivalentOfAnotherEntity(
+                $this->transaction->received_entity_id,
+                $received
             );
         }
+
+        $this->transaction->update([
+            'given_entity_amount' => $given,
+            'received_entity_amount' => $received
+        ]);
+    }
+
+    protected function resolveDriverInstance(): void
+    {
+
     }
 }
