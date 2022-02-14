@@ -6,6 +6,7 @@ use App\Http\Requests\Verification\CreateRequest;
 use App\Services\AuthenticationService\Client;
 use App\Services\VerificationService\Exceptions\FailedToParseToAttachmentDtoException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
 
 trait VerificationBuilderCanParseRequest
 {
@@ -29,9 +30,7 @@ trait VerificationBuilderCanParseRequest
             $this->setMiddleName($request->input('middle_name'));
         }
 
-        $this->setUser(
-            app(Client::class)->currentUser()
-        );
+        $this->setUser(Auth::user());
 
         $this->setAttachments(
             $this->prepareAttachmentsArray(

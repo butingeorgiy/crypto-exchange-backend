@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\ModelExceptions\ExchangeEntity\NotFoundException as ExchangeEntityNotFoundException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -73,5 +74,34 @@ class ExchangeEntity extends Model
     public function getLinkOnIcon(): string
     {
         return asset('storage/entity_icons/' . $this->icon);
+    }
+
+    /**
+     * Get cost as string.
+     *
+     * @return string
+     */
+    public function getCostAsString(): string
+    {
+        return number_format($this->cost, 2, '.', ' ') . ' ₸';
+    }
+
+    /**
+     * Calculate equivalent of another entity.
+     *
+     * @param int $id
+     * @param float $amount
+     *
+     * @return float
+     *
+     * @throws ExchangeEntityNotFoundException
+     */
+    public function calculateEquivalentOfAnotherEntity(int $id, float $amount): float
+    {
+        if (!$anotherEntity = ExchangeEntity::select(['id', 'cost'])->find($id)) {
+            throw new ExchangeEntityNotFoundException;
+        }
+
+        return round($amount * $anotherEntity->cost / $this->cost, 2);
     }
 }

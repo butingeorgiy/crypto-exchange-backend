@@ -10,12 +10,5 @@ use Illuminate\Http\Request;
 
 class ExchangeController extends Controller
 {
-    public function directions(): JsonResponse
-    {
-        $representer = new DirectionsRepresenter(ExchangeDirection::getAllEnabled());
-
-        return response()->json([
-            'directions' => $representer->getRepresented()
-        ], options: JSON_UNESCAPED_UNICODE);
-    }
+    //
 }

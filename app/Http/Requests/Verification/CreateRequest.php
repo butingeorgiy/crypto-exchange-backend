@@ -45,7 +45,11 @@ class CreateRequest extends FormRequest
                     if ($isExist) $fail(trans('validation.unique', ['attribute' => $attribute]));
                 }
             ],
-            'telegram_login' => 'required|string|min:5|max:30',
+            'telegram_login' => [
+                'required',
+                'string',
+                'regex:/^@\w{5,30}$/'
+            ],
             'selfie_attachment' => 'required|file|max:2000|mimes:jpeg,png,pdf',
             'scan_attachment' => 'required|file|max:2000|mimes:jpeg,png,pdf'
         ];

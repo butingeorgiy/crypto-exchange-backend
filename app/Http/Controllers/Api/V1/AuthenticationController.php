@@ -28,9 +28,7 @@ class AuthenticationController extends Controller
      *
      * @throws UserNotFoundException
      * @throws WrongPasswordException
-     * @throws FailedToAttachTokenException
      * @throws NonEmailVerifiedUserException
-     * @throws UnableToGeneratePersonalSaltException
      */
     public function authenticate(AuthenticateRequest $request): JsonResponse
     {
@@ -44,14 +42,19 @@ class AuthenticationController extends Controller
         $user->checkPassword($request->input('password'))
             ?: throw new WrongPasswordException;
 
+        $roles = array_map(
+            fn (array $role): string => $role['alias'],
+            $user->roles()->select('alias')->get()->toArray()
+        );
+
         # Attach auth token to user.
-        $encryptedToken = $user->attachToken();
+        $accessToken = $user->createToken('API Access Token', $roles);
 
         return response()->json([
             'success' => true,
-            'role' => optional($user->roles->first())->alias,
+            'roles' => $roles,
             'credentials' => [
-                'token' => $encryptedToken,
+                'token' => $accessToken->plainTextToken,
                 'available_days' => 7
             ]
         ], options: JSON_UNESCAPED_UNICODE);

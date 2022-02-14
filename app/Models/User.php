@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
-use App\Services\AuthenticationService\Traits\HasAuthToken;
 use App\Services\AuthenticationService\Traits\HasUniqueHashing;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @property int id
@@ -35,10 +35,10 @@ use Illuminate\Support\Str;
  *
  * @mixin Builder
  */
-class User extends Model
+class User extends Authenticatable
 {
     use HasFactory;
-    use HasAuthToken;
+    use HasApiTokens;
     use HasUniqueHashing;
 
     public $timestamps = false;
@@ -53,32 +53,6 @@ class User extends Model
     # Relations
 
     /**
-     * Generate unique referral code for user.
-     *
-     * @return string
-     */
-    public static function generateRefCode(): string
-    {
-        while (true) {
-            $refCode = Str::random(8);
-
-            if (!User::byRef($refCode)->exists()) break;
-        }
-
-        return $refCode;
-    }
-
-    /**
-     * Return user's tokens relations.
-     *
-     * @return HasMany
-     */
-    public function tokens(): HasMany
-    {
-        return $this->hasMany(AuthToken::class);
-    }
-
-    /**
      * Return user's roles relations.
      *
      * @return BelongsToMany
@@ -86,6 +60,16 @@ class User extends Model
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'user_has_role');
+    }
+
+    /**
+     * Return user's email verification requests relations.
+     *
+     * @return HasMany
+     */
+    public function emailVerifications(): HasMany
+    {
+        return $this->hasMany(EmailVerificationRequest::class);
     }
 
     /**
@@ -99,16 +83,6 @@ class User extends Model
     }
 
     # Scopes
-
-    /**
-     * Return user's email verification requests relations.
-     *
-     * @return HasMany
-     */
-    public function emailVerifications(): HasMany
-    {
-        return $this->hasMany(EmailVerificationRequest::class);
-    }
 
     /**
      * Scope for byPhone() method.
@@ -146,5 +120,21 @@ class User extends Model
     public function isVerified(): bool
     {
         return $this->is_verified;
+    }
+
+    /**
+     * Generate unique referral code for user.
+     *
+     * @return string
+     */
+    public static function generateRefCode(): string
+    {
+        while (true) {
+            $refCode = Str::random(8);
+
+            if (!User::byRef($refCode)->exists()) break;
+        }
+
+        return $refCode;
     }
 }

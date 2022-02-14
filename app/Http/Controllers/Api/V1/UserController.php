@@ -8,11 +8,13 @@ use App\Exceptions\ModelExceptions\UserCredentialsUpdateRequest\FailedToCreateEx
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UpdateCredentialsRequest;
 use App\Http\Requests\User\UpdateCurrentRequest;
+use App\Models\Role;
 use App\Models\User;
 use App\Services\AuthenticationService\Client as AuthenticationClient;
 use App\Services\UserService\Client as UserService;
 use App\Services\UserService\Exceptions\CredentialsRequestValidationFailedException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -25,9 +27,9 @@ class UserController extends Controller
      */
     public function current(): JsonResponse
     {
-        $userId = app(AuthenticationClient::class)->currentUserId();
-
-        $user = User::select([
+        /** @var User $user */
+        $user = User::with('roles:alias')->select([
+            'id',
             'first_name',
             'last_name',
             'middle_name',
@@ -35,9 +37,22 @@ class UserController extends Controller
             'email',
             'ref_code',
             'is_verified'
-        ])->find($userId) ?: throw new UserNotFoundException;
+        ])->find(Auth::id()) ?: throw new UserNotFoundException;
 
-        return response()->json($user, options: JSON_UNESCAPED_UNICODE);
+        $roles = [];
+
+        /** @var Role $role */
+        foreach ($user->roles as $role) {
+            $roles[] = $role->alias;
+        }
+
+        return response()->json(array_merge(
+            $user->makeHidden('id', 'roles')->toArray(),
+            [
+                'roles' => $roles,
+                'transfers_amount' => 0
+            ]
+        ), options: JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -51,7 +66,7 @@ class UserController extends Controller
      */
     public function updateCurrent(UpdateCurrentRequest $request): JsonResponse
     {
-        $user = app(AuthenticationClient::class)->currentUser();
+        $user = Auth::user();
 
         if (
             $request->has('first_name') &&
@@ -103,7 +118,7 @@ class UserController extends Controller
     public function updateCredentials(UpdateCredentialsRequest $request): JsonResponse
     {
         $updater = UserService::credentialsUpdater();
-        $user = app(AuthenticationClient::class)->currentUser(['email']);
+        $user = User::select('email')->findOrFail(Auth::id());
 
         $hiddenEmail = hidden_string($user->email);
 

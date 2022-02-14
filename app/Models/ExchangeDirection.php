@@ -130,4 +130,33 @@ class ExchangeDirection extends Model
             })
             ->where('enabled', true)->get();
     }
+
+    /**
+     * Get direction ID by entities ID.
+     *
+     * @param int $givenEntityId
+     * @param int $receivedEntityId
+     *
+     * @return int|null
+     */
+    public static function getIdByEntities(int $givenEntityId, int $receivedEntityId): ?int
+    {
+        $direction = ExchangeDirection::query()
+            ->select(['id', 'first_entity_id', 'second_entity_id', 'inverting_allowed'])
+            ->where(function (Builder $builder) use ($givenEntityId, $receivedEntityId) {
+                $builder
+                    ->where([
+                        ['first_entity_id', $givenEntityId],
+                        ['second_entity_id', $receivedEntityId]
+                    ])
+                    ->orWhere([
+                        ['first_entity_id', $receivedEntityId],
+                        ['second_entity_id', $givenEntityId],
+                        ['inverting_allowed', true]
+                    ]);
+            })
+            ->first();
+
+        return optional($direction)['id'];
+    }
 }

@@ -36,7 +36,7 @@ class UserFactory extends Factory
             'last_name' => $this->faker->lastName(),
             'phone_number' => preg_replace('/\D+/', '', $this->faker->phoneNumber()),
             'email' => $this->faker->email(),
-            'password' => User::hashPassword('password'),
+            'password' => User::hashPassword('Qiqr$LGD3a4bf$&$'),
             'ref_code' => Str::random(8)
         ];
     }
