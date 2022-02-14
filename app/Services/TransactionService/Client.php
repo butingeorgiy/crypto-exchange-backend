@@ -14,7 +14,7 @@ class Client
      * @return ComplexValidator
      */
     #[Pure]
-    public static function validator(): ComplexValidator
+    public function validator(): ComplexValidator
     {
         return new ComplexValidator;
     }
@@ -30,8 +30,8 @@ class Client
      *
      * @return Preparator
      */
-    public static function prepare(int $givenEntityId, float $givenEntityAmount,
-                                   int $receivedEntityId, float $receivedEntityAmount, bool $inverted): Preparator
+    public function preparationService(int $givenEntityId, float $givenEntityAmount,
+                                       int $receivedEntityId, float $receivedEntityAmount, bool $inverted): Preparator
     {
         return new Preparator(
             $givenEntityId,
@@ -50,8 +50,7 @@ class Client
      *
      * @return Creator
      */
-    #[Pure]
-    public static function create(Transaction $transaction, User $user): Creator
+    public function creationService(Transaction $transaction, User $user): Creator
     {
         return new Creator($transaction, $user);
     }

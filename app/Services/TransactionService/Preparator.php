@@ -143,9 +143,11 @@ class Preparator
 
         return Transaction::query()->create([
             'id' => $this->getTransactionUuid(),
+            'given_entity_id' => $givenEntity->id,
             'given_entity_name' => $givenEntity->name,
             'given_entity_amount' => $this->givenEntityAmount,
             'given_entity_cost' => $givenEntity->cost,
+            'received_entity_id' => $receivedEntity->id,
             'received_entity_name' => $receivedEntity->name,
             'received_entity_amount' => $this->receivedEntityAmount,
             'received_entity_cost' => $receivedEntity->cost,

@@ -4,17 +4,37 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\ModelExceptions\ExchangeEntity\NotFoundException as ExchangeEntityNotFoundException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Transaction\CompleteRequest;
 use App\Http\Requests\Transaction\CreateRequest;
 use App\Http\Requests\Transaction\PrepareRequest;
 use App\Jobs\EmailVerificationJob;
 use App\Models\ExchangeEntity;
 use App\Models\User;
 use App\Services\TransactionService\Client as TransactionService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class TransactionController extends Controller
 {
+    /**
+     * Transaction service instance.
+     *
+     * @var TransactionService
+     */
+    protected TransactionService $transactionService;
+
+    /**
+     * Class constructor.
+     *
+     * @param TransactionService $transactionService
+     */
+    public function __construct(TransactionService $transactionService)
+    {
+        $this->transactionService = $transactionService;
+    }
+
     /**
      * Prepare transaction.
      *
@@ -51,7 +71,7 @@ class TransactionController extends Controller
             );
         }
 
-        $transactionService = TransactionService::prepare(
+        $preparationService = $this->transactionService->preparationService(
             $request->input('given_entity_id'),
             $givenEntityAmount ?? $request->input('given_entity_amount'),
             $request->input('received_entity_id'),
@@ -59,12 +79,12 @@ class TransactionController extends Controller
             $request->input('inverted')
         );
 
-        $transaction = $transactionService->save();
+        $transaction = $preparationService->save();
 
         return response()->json([
-            'transaction_uuid' => $transactionService->getTransactionUuid(),
+            'transaction_uuid' => $preparationService->getTransactionUuid(),
             'transaction_type' => $transaction->type,
-            'next_step_url' => $transactionService->getNextStepUrl()
+            'next_step_url' => $preparationService->getNextStepUrl()
         ], options: JSON_UNESCAPED_UNICODE);
     }
 
@@ -74,28 +94,57 @@ class TransactionController extends Controller
      * @param CreateRequest $request
      *
      * @return JsonResponse
+     *
+     * @throws Exception
      */
     public function create(CreateRequest $request): JsonResponse
     {
-        if (Auth::guest()) {
+        if (Auth::guard('sanctum')->guest()) {
             $user = User::query()
                 ->create([
                     'first_name' => $request->input('user_data.name'),
                     'phone_number' => $request->input('user_data.phone_number'),
-                    'email' => $request->input('user_data.email')
+                    'email' => $request->input('user_data.email'),
+                    'password' => User::hashPassword($password = Str::random()),
+                    'ref_code' => User::generateRefCode()
                 ]);
 
+            // TODO: mail password at user's E-mail address
+
             EmailVerificationJob::dispatch($user)->delay(now()->addSeconds(5));
-        } else {
-            $user = Auth::user();
         }
 
+        $creationService = $this->transactionService->creationService(
+            $request->getTransactionModel(),
+            $user ?? Auth::guard('sanctum')->user()
+        );
+
+        if ($request->hasAny('given_entity_amount', 'received_entity_amount')) {
+            $creationService->updateAmount(
+                $request->input('given_entity_amount'),
+                $request->input('received_entity_amount')
+            );
+        }
+
+        $clientResponse = $creationService->create(
+            $request->input('options', [])
+        );
+
         return response()->json([
-            'success' => true
+            'success' => true,
+            'message' => $creationService->getMessageForClient(),
+            'transaction_response' => $clientResponse
         ], options: JSON_UNESCAPED_UNICODE);
     }
 
-    public function complete(): JsonResponse
+    /**
+     * Complete transaction.
+     *
+     * @param CompleteRequest $request
+     *
+     * @return JsonResponse
+     */
+    public function complete(CompleteRequest $request): JsonResponse
     {
         return response()->json([
             'success' => true

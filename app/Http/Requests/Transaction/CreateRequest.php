@@ -5,7 +5,9 @@ namespace App\Http\Requests\Transaction;
 use App\Models\ExchangeDirection;
 use App\Models\Transaction;
 use App\Services\TransactionService\Client as TransactionServiceClient;
+use App\Services\TransactionService\ComplexValidator as TransactionComplexValidator;
 use Exception;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Validator;
@@ -20,6 +22,20 @@ class CreateRequest extends FormRequest
      * @var bool
      */
     protected $stopOnFirstFailure = true;
+
+    /**
+     * Transaction model instance.
+     *
+     * @var Transaction|null
+     */
+    protected ?Transaction $transaction = null;
+
+    /**
+     * Transaction validator instance.
+     *
+     * @var TransactionComplexValidator
+     */
+    protected TransactionComplexValidator $complexValidator;
 
     /**
      * Get the validation rules that apply to the request.
@@ -60,11 +76,19 @@ class CreateRequest extends FormRequest
      * @param Validator $validator
      *
      * @return void
+     *
+     * @throws BindingResolutionException
      */
     public function withValidator(Validator $validator): void
     {
+        if ($validator->errors()->any()) {
+            return;
+        }
+
+        $this->complexValidator = app()->make(TransactionServiceClient::class)->validator();
+
         $validator->after(function (Validator $validator) {
-            if (Auth::guest() && !$this->has('user_data')) {
+            if (Auth::guard('sanctum')->guest() && !$this->has('user_data')) {
                 $validator->errors()->add(
                     'user_data',
                     'Необходимо указать данные пользователя.'
@@ -73,12 +97,7 @@ class CreateRequest extends FormRequest
                 return;
             }
 
-            /** @var Transaction $transaction */
-            $transaction = Transaction::query()
-                ->select([
-                    'id', 'direction_id', 'inverted', 'type'
-                ])
-                ->findOrFail($this->input('uuid'));
+            $transaction = $this->getTransactionModel();
 
             /** @var ExchangeDirection $direction */
             $direction = $transaction->getDirection(['id']);
@@ -103,12 +122,10 @@ class CreateRequest extends FormRequest
                 return;
             }
 
-            $transactionValidator = TransactionServiceClient::validator();
-
             # Check extra transaction options.
 
             try {
-                $transactionValidator->ensureOptionsValidity(
+                $this->complexValidator->ensureOptionsValid(
                     $transaction->type,
                     $this->input('options', [])
                 );
@@ -119,7 +136,7 @@ class CreateRequest extends FormRequest
             # Check limits if any amount has been changed.
 
             if ($givenEntityAmount !== null || $receivedEntityAmount !== null) {
-                $canPrepare = $transactionValidator->canUserPrepareTransaction(
+                $canPrepare = $this->complexValidator->canUserPrepareTransaction(
                     directionId: $direction->id,
                     inverted: $transaction->getIsInverted(),
                     givenEntityAmount: $givenEntityAmount,
@@ -135,5 +152,32 @@ class CreateRequest extends FormRequest
                 }
             }
         });
+    }
+
+    /**
+     * Get transaction model.
+     *
+     * @return Transaction
+     */
+    public function getTransactionModel(): Transaction
+    {
+        if (is_null($this->transaction)) {
+            $this->transaction = Transaction::query()
+                ->select([
+                    'id',
+                    'direction_id',
+                    'inverted',
+                    'given_entity_id',
+                    'given_entity_amount',
+                    'given_entity_cost',
+                    'received_entity_id',
+                    'received_entity_amount',
+                    'received_entity_cost',
+                    'type'
+                ])
+                ->findOrFail($this->input('uuid'));
+        }
+
+        return $this->transaction;
     }
 }

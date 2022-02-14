@@ -135,6 +135,20 @@ class Creator
     }
 
     /**
+     * Get message for client.
+     *
+     * @return string
+     */
+    public function getMessageForClient(): string
+    {
+        if (is_null($this->transactionDriver)) {
+            return 'Заявка успешно сформирована! Ожидайте, менеджер с Вами свяжется в ближайшее время.';
+        }
+
+        return $this->transactionDriver->prepareMessageForClient();
+    }
+
+    /**
      * Resolve driver instance.
      *
      * @return void

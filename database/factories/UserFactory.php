@@ -31,13 +31,19 @@ class UserFactory extends Factory
     ])]
     public function definition(): array
     {
+        $phoneNumber = preg_replace('/\D+/', '', $this->faker->phoneNumber());
+
+        if (strlen($phoneNumber) === 10) {
+            $phoneNumber = '7' . $phoneNumber;
+        }
+
         return [
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
-            'phone_number' => preg_replace('/\D+/', '', $this->faker->phoneNumber()),
+            'phone_number' => $phoneNumber,
             'email' => $this->faker->email(),
             'password' => User::hashPassword('Qiqr$LGD3a4bf$&$'),
-            'ref_code' => Str::random(8)
+            'ref_code' => User::generateRefCode()
         ];
     }
 }

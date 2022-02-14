@@ -3,7 +3,9 @@
 namespace App\Http\Requests\Transaction;
 
 use App\Models\ExchangeDirection;
-use App\Services\TransactionService\Client as TransferServiceClient;
+use App\Services\TransactionService\Client as TransactionServiceClient;
+use App\Services\TransactionService\ComplexValidator as TransactionComplexValidator;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Validator;
@@ -17,6 +19,13 @@ class PrepareRequest extends FormRequest
      * @var bool
      */
     protected $stopOnFirstFailure = true;
+
+    /**
+     * Transaction validator instance.
+     *
+     * @var TransactionComplexValidator
+     */
+    protected TransactionComplexValidator $complexValidator;
 
     /**
      * Request's rules.
@@ -47,12 +56,21 @@ class PrepareRequest extends FormRequest
      * @param Validator $validator
      *
      * @return void
+     *
+     * @throws BindingResolutionException
      */
     public function withValidator(Validator $validator): void
     {
+        if ($validator->errors()->any()) {
+            return;
+        }
+
+        $this->complexValidator = app()->make(TransactionServiceClient::class)->validator();
+
         $validator->after(function (Validator $validator) {
             $givenEntityId = $this->input('given_entity_id');
             $givenEntityAmount = $this->input('given_entity_amount');
+
             $receivedEntityId = $this->input('received_entity_id');
             $receivedEntityAmount = $this->input('received_entity_amount');
 
@@ -65,9 +83,7 @@ class PrepareRequest extends FormRequest
                 return;
             }
 
-            $transferValidator = TransferServiceClient::validator();
-
-            if (!$transferValidator->hasDirection($givenEntityId, $receivedEntityId)) {
+            if (!$this->complexValidator->hasDirection($givenEntityId, $receivedEntityId)) {
                 $validator->errors()->add(
                     'transfer_direction',
                     'Обмен между указанными позициями невозможен.'
@@ -76,11 +92,9 @@ class PrepareRequest extends FormRequest
                 return;
             }
 
-            $directionId = $this->getDirectionId();
-
-            $canPrepare = $transferValidator
+            $canPrepare = $this->complexValidator
                 ->canUserPrepareTransaction(
-                    directionId: $directionId,
+                    directionId: $this->getDirectionId(),
                     inverted: $this->input('inverted'),
                     givenEntityAmount: $givenEntityAmount,
                     receivedEntityAmount: $receivedEntityAmount,

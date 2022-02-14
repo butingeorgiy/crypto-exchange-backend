@@ -25,4 +25,11 @@ interface CompletableTransactionContract
      * @return array
      */
     public function prepareDataForClient(Transaction $transaction, array $options = []): array;
+
+    /**
+     * Prepare message for client.
+     *
+     * @return string
+     */
+    public function prepareMessageForClient(): string;
 }

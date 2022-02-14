@@ -21,4 +21,14 @@ class EMoneyToCryptoDriver implements CompletableTransactionContract
     {
         return [];
     }
+
+    /**
+     * @inheritdoc
+     *
+     * @return string
+     */
+    public function prepareMessageForClient(): string
+    {
+        return 'Заявка успешно сформирована! Ожидайте, менеджер с Вами свяжется в ближайшее время.';
+    }
 }

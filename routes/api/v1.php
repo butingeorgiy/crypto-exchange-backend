@@ -40,4 +40,5 @@ Route::prefix('verification')->group(function () {
 Route::prefix('transactions')->group(function () {
     Route::post('prepare', [TransactionController::class, 'prepare']);
     Route::post('create', [TransactionController::class, 'create']);
+    Route::post('complete', [TransactionController::class, 'complete']);
 });

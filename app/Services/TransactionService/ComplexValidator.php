@@ -153,7 +153,7 @@ class ComplexValidator
      *
      * @throws Exception
      */
-    public function ensureOptionsValidity(string $type, array $options = []): void
+    public function ensureOptionsValid(string $type, array $options = []): void
     {
         if (in_array($type, ['e_money_to_crypto', 'crypto_to_crypto']) && !isset($options['wallet_address'])) {
             throw new Exception('Необходимо указать адрес крипто-кошелька для перевода средств.');
