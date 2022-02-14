@@ -4,7 +4,8 @@ namespace App\Http\Requests\Transaction;
 
 use App\Models\ExchangeDirection;
 use App\Models\Transaction;
-use App\Services\TransactionService\Client as TransferServiceClient;
+use App\Services\TransactionService\Client as TransactionServiceClient;
+use Exception;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Validator;
@@ -75,7 +76,7 @@ class CreateRequest extends FormRequest
             /** @var Transaction $transaction */
             $transaction = Transaction::query()
                 ->select([
-                    'id', 'meta_direction_id', 'meta_inverted'
+                    'id', 'direction_id', 'inverted', 'type'
                 ])
                 ->findOrFail($this->input('uuid'));
 
@@ -102,15 +103,29 @@ class CreateRequest extends FormRequest
                 return;
             }
 
+            $transactionValidator = TransactionServiceClient::validator();
+
+            # Check extra transaction options.
+
+            try {
+                $transactionValidator->ensureOptionsValidity(
+                    $transaction->type,
+                    $this->input('options', [])
+                );
+            } catch (Exception $e) {
+                throw new HttpException(400, $e->getMessage());
+            }
+
+            # Check limits if any amount has been changed.
+
             if ($givenEntityAmount !== null || $receivedEntityAmount !== null) {
-                $canPrepare = TransferServiceClient::validator()
-                    ->canUserPrepareTransaction(
-                        directionId: $direction->id,
-                        inverted: $transaction->getIsInverted(),
-                        givenEntityAmount: $givenEntityAmount,
-                        receivedEntityAmount: $receivedEntityAmount,
-                        userId: Auth::id()
-                    );
+                $canPrepare = $transactionValidator->canUserPrepareTransaction(
+                    directionId: $direction->id,
+                    inverted: $transaction->getIsInverted(),
+                    givenEntityAmount: $givenEntityAmount,
+                    receivedEntityAmount: $receivedEntityAmount,
+                    userId: Auth::id()
+                );
 
                 if (!$canPrepare) {
                     $validator->errors()->add(

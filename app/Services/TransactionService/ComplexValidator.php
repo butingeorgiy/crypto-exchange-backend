@@ -143,8 +143,24 @@ class ComplexValidator
         return true;
     }
 
-    public function checkExtraOptions(string $type, array $options = []): void
+    /**
+     * Check extra options.
+     *
+     * @param string $type
+     * @param array $options
+     *
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function ensureOptionsValidity(string $type, array $options = []): void
     {
-        // TODO: write method
+        if (in_array($type, ['e_money_to_crypto', 'crypto_to_crypto']) && !isset($options['wallet_address'])) {
+            throw new Exception('Необходимо указать адрес крипто-кошелька для перевода средств.');
+        }
+
+        if ($type === 'crypto_to_e_money' && !isset($options['card_number'])) {
+            throw new Exception('Необходимо указать номер карты для перевода средств.');
+        }
     }
 }

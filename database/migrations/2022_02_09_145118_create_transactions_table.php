@@ -53,6 +53,7 @@ class CreateTransactionsTable extends Migration
             ]);
 
             $table->tinyInteger('status_id', unsigned: true);
+            $table->json('options')->nullable();
             $table->timestamps();
 
             # Foreign keys

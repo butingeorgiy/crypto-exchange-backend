@@ -137,4 +137,14 @@ class User extends Authenticatable
 
         return $refCode;
     }
+
+    /**
+     * Get user's full name.
+     *
+     * @return string
+     */
+    public function getFullName(): string
+    {
+        return trim("$this->last_name $this->first_name $this->middle_name");
+    }
 }

@@ -90,10 +90,15 @@ class TransactionController extends Controller
             $user = Auth::user();
         }
 
-
-
         return response()->json([
             'success' => true
         ], options: JSON_UNESCAPED_UNICODE);
+    }
+
+    public function complete(): JsonResponse
+    {
+        return response()->json([
+            'success' => true
+        ], JSON_UNESCAPED_UNICODE);
     }
 }
