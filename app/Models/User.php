@@ -147,4 +147,28 @@ class User extends Authenticatable
     {
         return trim("$this->last_name $this->first_name $this->middle_name");
     }
+
+    /**
+     * Get formatted phone.
+     *
+     * @return string|null
+     */
+    public function getFormattedPhone(): ?string
+    {
+        if (preg_match('/^(\d{1,4})(\d{3})(\d{3})(\d{4})$/', $this->phone_number, $matches)) {
+            return "+$matches[1] ($matches[2]) $matches[3] $matches[4]";
+        }
+
+        return null;
+    }
+
+    /**
+     * Get referral link.
+     *
+     * @return string
+     */
+    public function getReferralLink(): string
+    {
+        return config('app.url') . '/referral_link/' . $this->ref_code;
+    }
 }
