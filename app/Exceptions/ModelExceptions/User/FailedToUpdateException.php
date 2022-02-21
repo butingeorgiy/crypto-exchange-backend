@@ -6,5 +6,5 @@ use Exception;
 
 class FailedToUpdateException extends Exception
 {
-    public string $defaultMessage = 'Не удалось обновить пользователя.';
+    protected $message = 'Не удалось обновить пользователя.';
 }

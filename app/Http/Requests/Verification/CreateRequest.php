@@ -3,8 +3,8 @@
 namespace App\Http\Requests\Verification;
 
 use App\Models\User;
-use App\Services\AuthenticationService\Client as AuthenticationClient;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 use JetBrains\PhpStorm\ArrayShape;
 
 class CreateRequest extends FormRequest
@@ -35,10 +35,8 @@ class CreateRequest extends FormRequest
                 'required',
                 'regex:/^(\d{1,4})(\d{3})(\d{3})(\d{4})$/',
                 function ($attribute, $value, $fail) {
-                    $userId = app(AuthenticationClient::class)->currentUserId();
-
                     $isExist = User::where([
-                        ['id', '!=', $userId],
+                        ['id', '!=', Auth::id()],
                         ['phone_number', $value]
                     ])->exists();
 

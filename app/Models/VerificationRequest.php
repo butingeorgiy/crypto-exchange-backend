@@ -21,15 +21,23 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  */
 class VerificationRequest extends Model
 {
+    /**
+     * @var bool
+     */
     public $timestamps = false;
 
+    /**
+     * @var array
+     */
     protected $guarded = [];
 
-    # Statuses IDs
+
+    # Status IDs
 
     public static int $CREATED_STATUS_ID = 1;
     public static int $ACCEPTED_STATUS_ID = 2;
     public static int $DECLINED_STATUS_ID = 3;
+
 
     # Relations
 

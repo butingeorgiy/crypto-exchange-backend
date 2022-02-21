@@ -5,11 +5,13 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
 use Carbon\Carbon;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables\Columns\BooleanColumn;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Model;
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
 
@@ -23,7 +25,103 @@ class UserResource extends Resource
     /**
      * @var string|null
      */
-    protected static ?string $navigationIcon = 'heroicon-o-collection';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
+
+
+    # Localization
+
+    /**
+     * @return string
+     */
+    public static function getBreadcrumb(): string
+    {
+        return 'Пользователи';
+    }
+
+    /**
+     * @return string
+     */
+    protected static function getNavigationLabel(): string
+    {
+        return 'Пользователи';
+    }
+
+    /**
+     * @return string
+     */
+    public static function getLabel(): string
+    {
+        return 'Пользователь';
+    }
+
+    /**
+     * @return string
+     */
+    public static function getPluralLabel(): string
+    {
+        return 'Пользователи';
+    }
+
+    /**
+     * @param Model|null $record
+     *
+     * @return string|null
+     */
+    #[Pure]
+    public static function getRecordTitle(?Model $record): ?string
+    {
+        /** @var User $record */
+
+        return $record->getFullName();
+    }
+
+
+    # Permissions
+
+    /**
+     * Can creation.
+     *
+     * @return bool
+     */
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Can deleting.
+     *
+     * @param Model $record
+     *
+     * @return bool
+     */
+    public static function canDelete(Model $record): bool
+    {
+        return false;
+    }
+
+
+    # Global Search Configuration
+
+    /**
+     * @return string[]
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['first_name', 'last_name', 'middle_name', 'phone_number', 'email'];
+    }
+
+    /**
+     * @param Model $record
+     *
+     * @return string
+     */
+    #[Pure]
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        /** @var User $record */
+        return $record->getFullName() . ' (' . $record->email . ')';
+    }
 
     /**
      * @param Form $form
@@ -34,7 +132,9 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Toggle::make('is_email_verified')->label('E-mail подтвержден'),
+
+                Toggle::make('is_verified')->label('Верифицирован')
             ]);
     }
 
@@ -78,13 +178,6 @@ class UserResource extends Resource
             ->filters([
                 //
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     #[Pure]

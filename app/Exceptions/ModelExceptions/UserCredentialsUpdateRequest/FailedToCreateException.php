@@ -6,5 +6,5 @@ use Exception;
 
 class FailedToCreateException extends Exception
 {
-    public string $defaultMessage = 'Failed to create user credentials update request.';
+    protected $message = 'Failed to create user credentials update request.';
 }

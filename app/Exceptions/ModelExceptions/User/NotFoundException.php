@@ -3,10 +3,29 @@
 namespace App\Exceptions\ModelExceptions\User;
 
 use Exception;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
-class NotFoundException extends Exception
+class NotFoundException extends Exception implements HttpExceptionInterface
 {
-    public int $status = 404;
+    protected $message = 'Пользователь не найден.';
 
-    public string $defaultMessage = 'Пользователь не найден.';
+    /**
+     * @inheritdoc
+     *
+     * @return int
+     */
+    public function getStatusCode(): int
+    {
+        return 404;
+    }
+
+    /**
+     * @inheritdoc
+     *
+     * @return array
+     */
+    public function getHeaders(): array
+    {
+        return [];
+    }
 }

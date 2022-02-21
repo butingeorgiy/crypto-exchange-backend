@@ -6,5 +6,5 @@ use Exception;
 
 class FailedToCreateException extends Exception
 {
-    public string $defaultMessage = 'Не удалось создать запрос на верификацию.';
+    protected $message = 'Не удалось создать запрос на верификацию.';
 }
