@@ -86,8 +86,7 @@ class DirectionsRepresenter
                 'max_not_verified' => $entity->no_verify_limit
             ],
             'icon' => $entity->getLinkOnIcon(),
-            'type' => $entity->type,
-            'pairs' => $this->getRepresentedPairs($entity->id, $given)
+            'type' => $entity->type
         ];
     }
 

@@ -101,13 +101,13 @@ class ExchangeDirection extends Model
     {
         if ($this->firstEntity->cost > $this->secondEntity->cost) {
             return [
-                round($this->firstEntity->cost / $this->secondEntity->cost, 2),
-                1
+                1,
+                round($this->firstEntity->cost / $this->secondEntity->cost, 2)
             ];
         } else if ($this->firstEntity->cost < $this->secondEntity->cost) {
             return [
-                1,
-                round($this->secondEntity->cost / $this->firstEntity->cost, 2)
+                round($this->secondEntity->cost / $this->firstEntity->cost, 2),
+                1
             ];
         }
 
