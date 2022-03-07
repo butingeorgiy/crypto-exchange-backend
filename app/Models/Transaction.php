@@ -84,9 +84,9 @@ class Transaction extends Model
     {
         /** @var ExchangeDirection $direction */
         return ExchangeDirection::query()
-            ->select($fields)
+            ->select($fields[0] === '*' ? $fields : array_merge($fields, ['enabled']))
             ->where('enabled', true)
-            ->first($this->direction_id);
+            ->find($this->direction_id);
     }
 
     /**

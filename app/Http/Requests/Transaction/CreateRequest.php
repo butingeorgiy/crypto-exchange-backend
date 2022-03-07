@@ -9,7 +9,7 @@ use App\Services\TransactionService\ComplexValidator as TransactionComplexValida
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Validator;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -59,10 +59,9 @@ class CreateRequest extends FormRequest
             'given_entity_amount' => 'nullable|numeric|min:0',
             'received_entity_amount' => 'nullable|numeric|min:0',
             'user_data' => 'nullable|array',
-            'user_data.name' => 'required_with:user_data|string|max:255',
-            'user_data.email' => 'required_with:user_data|string|email|max:255|unique:users,email',
+            'user_data.name' => 'string|max:255',
+            'user_data.email' => 'string|email|max:255|unique:users,email',
             'user_data.phone_number' => [
-                'required_with:user_data',
                 'regex:/^(\d{1,4})(\d{3})(\d{3})(\d{4})$/',
                 'unique:users,phone_number'
             ],
@@ -88,10 +87,23 @@ class CreateRequest extends FormRequest
         $this->complexValidator = app()->make(TransactionServiceClient::class)->validator();
 
         $validator->after(function (Validator $validator) {
-            if (Auth::guard('sanctum')->guest() && !$this->has('user_data')) {
+            if (auth()->guard('sanctum')->guest() && !$this->has('user_data')) {
                 $validator->errors()->add(
                     'user_data',
                     'Необходимо указать данные пользователя.'
+                );
+
+                return;
+            }
+
+            if (
+                auth()->guard('sanctum')->check() &&
+                is_null(auth()->guard('sanctum')->user()->first_name) &&
+                !$this->has('user_data.name')
+            ) {
+                $validator->errors()->add(
+                    'user_data',
+                    'Необходимо указать имя.'
                 );
 
                 return;
@@ -141,7 +153,7 @@ class CreateRequest extends FormRequest
                     inverted: $transaction->getIsInverted(),
                     givenEntityAmount: $givenEntityAmount,
                     receivedEntityAmount: $receivedEntityAmount,
-                    userId: Auth::id()
+                    userId: auth()->guard('sanctum')->id()
                 );
 
                 if (!$canPrepare) {

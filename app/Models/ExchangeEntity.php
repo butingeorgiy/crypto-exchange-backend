@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property double|null no_auth_limit
  * @property double|null no_verify_limit
  * @property string type available values: `cash`, `e_money`, `crypto`
+ * @property string color_card_type available values: `yellow`, `red`,`light-blue`, `blue`, `emerald`, `green`, `grey`
  * @property boolean enabled
  *
  * @method static Builder enabled() Add enabling condition to query.

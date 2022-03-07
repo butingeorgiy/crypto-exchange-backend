@@ -2,6 +2,7 @@
 
 namespace App\Services\TransactionService\Drivers;
 
+use App\Models\ExchangeEntity;
 use App\Models\Transaction;
 use JetBrains\PhpStorm\ArrayShape;
 
@@ -26,9 +27,15 @@ class CryptoToEMoneyDriver implements CompletableTransactionContract
     ])]
     public function prepareDataForClient(Transaction $transaction, array $options = []): array
     {
+        if ($given = ExchangeEntity::select(['id', 'alias'])->find($transaction->given_entity_id)) {
+            $transferAmount = $transaction->given_entity_amount . ' ' . $given->alias;
+        } else {
+            $transferAmount = $transaction->given_entity_amount . ' у.е.';
+        }
+
         return [
             'wallet_address' => '7a6ffed9-4252-427e-af7d-3dcaaf2db2df',
-            'transfer_amount' => $transaction->given_entity_amount,
+            'transfer_amount' => $transferAmount,
             'next_step_url' => config('app.url') . '/v1/transactions/complete?uuid=' . $transaction->id
         ];
     }

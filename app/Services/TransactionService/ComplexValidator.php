@@ -10,6 +10,7 @@ use App\Models\ExchangeEntity;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 
 class ComplexValidator
 {
@@ -64,6 +65,8 @@ class ComplexValidator
     {
         $direction = ExchangeDirection::select(['id', 'first_entity_id', 'second_entity_id'])->find($directionId)
             ?: throw new ExchangeDirectionNotFoundException;
+
+        Log::info($direction);
 
         # Resolving given and received entities.
 

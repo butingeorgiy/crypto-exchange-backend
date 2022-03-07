@@ -9,6 +9,7 @@ use App\Http\Requests\Transaction\CreateRequest;
 use App\Http\Requests\Transaction\PrepareRequest;
 use App\Jobs\EmailVerificationJob;
 use App\Models\ExchangeEntity;
+use App\Models\TransactionStatus;
 use App\Models\User;
 use App\Services\TransactionService\Client as TransactionService;
 use Exception;
@@ -99,7 +100,11 @@ class TransactionController extends Controller
      */
     public function create(CreateRequest $request): JsonResponse
     {
-        if (Auth::guard('sanctum')->guest()) {
+        /** @var User|null $user */
+        $user = auth()->guard('sanctum')->user();
+
+        # If user isn't authenticated then create an account.
+        if (is_null($user)) {
             $user = User::query()
                 ->create([
                     'first_name' => $request->input('user_data.name'),
@@ -114,10 +119,14 @@ class TransactionController extends Controller
             EmailVerificationJob::dispatch($user)->delay(now()->addSeconds(5));
         }
 
-        $creationService = $this->transactionService->creationService(
-            $request->getTransactionModel(),
-            $user ?? Auth::guard('sanctum')->user()
-        );
+        # If user is authenticated but doesn't have set first name.
+        elseif (is_null($user->first_name)) {
+            $user->update([
+                'first_name' => $request->input('user_data.name')
+            ]);
+        }
+
+        $creationService = $this->transactionService->creationService($request->getTransactionModel(), $user);
 
         if ($request->hasAny('given_entity_amount', 'received_entity_amount')) {
             $creationService->updateAmount(
@@ -146,8 +155,17 @@ class TransactionController extends Controller
      */
     public function complete(CompleteRequest $request): JsonResponse
     {
+        $transaction = $request->getTransaction();
+
+        if ($transaction->status_id === TransactionStatus::$PAYMENT_PENDING_STATUS_ID) {
+            $transaction->update([
+                'status_id' => TransactionStatus::$PENDING_STATUS_ID
+            ]);
+        }
+
         return response()->json([
-            'success' => true
+            'success' => true,
+            'message' => 'Пожалуйста ожидайте, с вами скоро свяжется наш менеджер'
         ], JSON_UNESCAPED_UNICODE);
     }
 }

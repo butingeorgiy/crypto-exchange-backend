@@ -7,7 +7,6 @@ use App\Services\TransactionService\Client as TransactionServiceClient;
 use App\Services\TransactionService\ComplexValidator as TransactionComplexValidator;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Validator;
 use JetBrains\PhpStorm\ArrayShape;
 
@@ -98,7 +97,7 @@ class PrepareRequest extends FormRequest
                     inverted: $this->input('inverted'),
                     givenEntityAmount: $givenEntityAmount,
                     receivedEntityAmount: $receivedEntityAmount,
-                    userId: Auth::id()
+                    userId: auth()->guard('sanctum')->id()
                 );
 
             if (!$canPrepare) {

@@ -21,8 +21,8 @@ class CreateExchangeEntitiesTable extends Migration
             $table->double('cost', 14, 4, true);
             $table->double('min_limit', 12, 5, true)->nullable();
             $table->double('max_limit', 12, 5, true)->nullable();
-            $table->integer('no_auth_limit', unsigned: true)->nullable();
-            $table->integer('no_verify_limit', unsigned: true)->nullable();
+            $table->double('no_auth_limit', 12, 5, true)->nullable();
+            $table->double('no_verify_limit', 12, 5, true)->nullable();
             $table->enum('type', ['cash', 'e_money', 'crypto']);
             $table->boolean('enabled')->default(true);
         });
