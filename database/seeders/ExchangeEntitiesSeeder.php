@@ -41,11 +41,11 @@ class ExchangeEntitiesSeeder extends Seeder
                 'name' => 'Bitcoin',
                 'alias' => 'BTC',
                 'icon' => '8P8tVZWrEKdfHW4L.png',
-                'cost' => 20592816.37,
-                'min_limit' => 0.001,
-                'max_limit' => 0.0485,
-                'no_auth_limit' => 0.0024,
-                'no_verify_limit' => 0.0072,
+                'cost' => 100000.37,
+                'min_limit' => 0.2,
+                'max_limit' => 10,
+                'no_auth_limit' => 0.5,
+                'no_verify_limit' => 1.5,
                 'type' => 'crypto'
             ],
             [
